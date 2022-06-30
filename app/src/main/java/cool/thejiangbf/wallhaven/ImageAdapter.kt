@@ -1,30 +1,33 @@
 package cool.thejiangbf.wallhaven
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import cool.thejiangbf.wallhaven.weapon.Bmp
 
 
 class ImageAdapter(val context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private val TYPE_FOOTER = 2
-    private val TYPE_ITEM = 1
     private var loadStat = 0
-    private val LOADING = 10
-    private val LOAD_COMPLETE = 11
-    private val LOAD_END = 12
 
     private var list = mutableListOf<Wallpaper>()
 
     fun update(new:MutableList<Wallpaper>){
         list.clear()
+        list.addAll(new)
+        notifyDataSetChanged()
+    }
+
+    fun insert(new:MutableList<Wallpaper>){
         list.addAll(new)
         notifyDataSetChanged()
     }
@@ -45,6 +48,14 @@ class ImageAdapter(val context: Context) : RecyclerView.Adapter<RecyclerView.Vie
                 Glide.with(context).load(wallpaper.snapshot).diskCacheStrategy(DiskCacheStrategy.ALL).into(ivSnapshot)
                 tvSize.text = wallpaper.size
             }
+
+            holder.itemView.setOnClickListener {
+                val intent = Intent(context,ViewActivity::class.java)
+                intent.putExtra("url",wallpaper.photo)
+                intent.putExtra("snap",Bmp.bmp2Bytes(holder.ivSnapshot.drawable.toBitmap()))
+                context.startActivity(intent)
+            }
+
         }else if (holder is FootVH){
             when(loadStat){
                 LOADING -> {
@@ -103,6 +114,14 @@ class ImageAdapter(val context: Context) : RecyclerView.Adapter<RecyclerView.Vie
 
     class FootVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvLoading: TextView = itemView.findViewById(R.id.tvLoading)
+    }
+
+    companion object{
+        public const val TYPE_FOOTER = 2
+        public const val TYPE_ITEM = 1
+        public const val LOADING = 10
+        public const val LOAD_COMPLETE = 11
+        public const val LOAD_END = 12
     }
 
 }

@@ -20,7 +20,7 @@ object document {
         return document.html(html).getElementsByTag(tagName)
     }
 
-    fun getElementsById(html: String, id: String): Element {
+    fun getElementById(html: String, id: String): Element {
         val document = Jsoup.parse(html)
         return document.html(html).getElementById(id)
     }

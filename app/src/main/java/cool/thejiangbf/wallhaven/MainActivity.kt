@@ -1,29 +1,26 @@
 package cool.thejiangbf.wallhaven
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ListAdapter
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import cool.thejiangbf.wallhaven.weapon.Ok
 import cool.thejiangbf.wallhaven.weapon.browser
 import cool.thejiangbf.wallhaven.weapon.document
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Response
-import org.jsoup.Jsoup
-import java.io.IOException
-import java.net.URL
+
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "壁纸天堂 * 独家珍藏"
     private lateinit var adapter : ImageAdapter
+    private var pageIndex = 1
+    private val maxIndex = 100
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,18 +34,53 @@ class MainActivity : AppCompatActivity() {
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
+
+                val manager = recyclerView.layoutManager as LinearLayoutManager?
+                //当不滑动时
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    //获取最后一个完全显示的itemPosition
+                    val lastItemPosition = manager!!.findLastCompletelyVisibleItemPosition()
+                    val itemCount = manager.itemCount
+                    // 判断是否滑动到了最后一个item，并且是向上滑动
+                    if (lastItemPosition == itemCount - 1 && isSlidingUpward) {
+                        loadingMore() //加载第二页
+                    }
+                }
+
             }
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                isSlidingUpward = dy>0
+            }
+
         })
 
-//        val temp = mutableListOf<Wallpaper>()
-//        repeat(10){
-//            temp.add(Wallpaper(R.drawable.img,"","1234x00$it"))
-//        }
-//
-//        adapter.update(temp)
+        requestHot(1)
+
+
     }
 
+    private fun loadingMore() {
+        adapter.setLoadState(ImageAdapter.LOADING) //FootView显示状态
+        if (pageIndex < maxIndex) {
+            pageIndex++
+            requestHot(pageIndex)
+            adapter.setLoadState(ImageAdapter.LOAD_COMPLETE)
+            adapter.notifyDataSetChanged()
+        }
+//        if (searchList.size() < count) {
+//            adapter.setLoadState(ImageAdapter.LOADING)
+//        } else {
+//            adapter.setLoadState(ImageAdapter.LOAD_END)
+//        }
+    }
+
+
+
+
     private fun requestHot(page:Int){
+        Log.i(TAG, "requestHot: $page")
         GlobalScope.launch {
             val doc = browser.connect("https://wallhaven.cc/hot?page=$page")
             val list = document.getElementsByTag(doc.html(),"figure")
@@ -72,7 +104,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             runOnUiThread{
-                adapter.update(walls)
+                adapter.insert(walls)
+                relativeEmpty.visibility = View.GONE
             }
 
         }

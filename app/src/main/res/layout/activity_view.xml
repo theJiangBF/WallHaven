@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ViewActivity"
+    android:background="#000"
+    >
+
+    <cool.thejiangbf.wallhaven.PinchImageView
+        android:id="@+id/ivBig"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"
+        android:layout_centerInParent="true"
+        />
+
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/loading"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
+        style="?android:attr/progressBarStyleLarge"/>
+
+    <LinearLayout
+        android:id="@+id/linearProperties"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
+        android:background="#CD000000"
+        android:orientation="vertical"
+        >
+
+        <LinearLayout style="@style/li" >
+            <TextView style="@style/title" android:text="Uploader" />
+            <TextView style="@style/property" android:textColor="#00F813" android:text="Uploader" android:id="@+id/tvUploader" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/li" >
+            <TextView style="@style/title" android:text="Category" />
+            <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvCategory" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/li" >
+            <TextView style="@style/title" android:text="Purity" />
+            <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvPurity" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/li" >
+            <TextView style="@style/title" android:text="Size" />
+            <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvSize" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/li" >
+            <TextView style="@style/title" android:text="Views" />
+            <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvViews" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/li" >
+            <TextView style="@style/title" android:text="Favourites" />
+            <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvFavourites" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</RelativeLayout>
