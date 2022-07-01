@@ -29,7 +29,6 @@
             android:layout_height="match_parent"
             android:layout_alignParentStart="true"
             android:layout_toLeftOf="@id/ivSearch"
-            android:background="@null"
             android:hint="input keywords..." />
 
     </RelativeLayout>

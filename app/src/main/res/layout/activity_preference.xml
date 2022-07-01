@@ -18,6 +18,24 @@
             android:paddingHorizontal="32dp"
             android:paddingTop="32dp"
             >
+
+            <TextView
+                android:id="@+id/tvApikey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="API KEY"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                />
+            <EditText
+                android:id="@+id/etApikey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="input your api key..."
+                android:text="2ebZOOhSWqgkSBcQjN0FuSVF0Im3Vx1d"
+                />
+
             <TextView
                 android:id="@+id/Categories"
                 android:layout_width="wrap_content"
@@ -87,6 +105,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="nsfw"
+                    android:enabled="false"
                     />
             </LinearLayout>
 

@@ -9,6 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewAnimationUtils
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -92,7 +93,6 @@ class MainActivity : AppCompatActivity() {
         val spp = getSharedPreferences("splash", MODE_PRIVATE)
         val src = spp.getString("url","https://w.wallhaven.cc/full/l3/wallhaven-l36mpy.jpg")
         purity = spp.getString("purity","111").toString()
-        apikey = Meta.get(this,"apikey")
 
         val sp = getSharedPreferences("prefs", MODE_PRIVATE)
         cate = sp.getString("Categories","100").toString()
@@ -101,6 +101,7 @@ class MainActivity : AppCompatActivity() {
         order = sp.getString("Order","desc").toString()
         topRange = sp.getString("TopRange","1M").toString()
         color = sp.getString("Color","").toString()
+        apikey = sp.getString("apikey","").toString()
 
 
         Glide.with(this).load(src).into(ivSplash)
@@ -168,6 +169,10 @@ class MainActivity : AppCompatActivity() {
         Log.i(TAG, "requestHot: $page")
         GlobalScope.launch {
             val doc = Bom.connect("https://wallhaven.cc/hot?page=$page&purity=$purity&apikey=$apikey&categories=$cate")
+            if (doc==null){
+                Toast.makeText(this@MainActivity, "服务器异常，请稍后重试！", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
             val list = document.getElementsByTag(doc.html(),"figure")
             Log.i(TAG, "requestHot: 找到${list.size}条数据")
 

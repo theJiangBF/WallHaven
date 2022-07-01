@@ -3,12 +3,14 @@ package cool.thejiangbf.wallhaven
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import cool.thejiangbf.wallhaven.weapon.Meta
 import cool.thejiangbf.wallhaven.weapon.Bom
+import cool.thejiangbf.wallhaven.weapon.Meta
 import cool.thejiangbf.wallhaven.weapon.document
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.coroutines.GlobalScope
@@ -30,7 +32,7 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        hideNavigation()
+        supportActionBar?.hide()
         setContentView(R.layout.activity_search)
 
         initView()
@@ -71,20 +73,28 @@ class SearchActivity : AppCompatActivity() {
         })
 
         ivSearch.setOnClickListener {
-            pageIndex = 1
-            search(etSearch.text.toString(),pageIndex)
-            loading.show()
+            if (etSearch.isEnabled){
+                pageIndex = 1
+                adapter.clear()
+                search(etSearch.text.toString(),pageIndex)
+                loading.show()
+                etSearch.isEnabled = false
+            }else{
+                etSearch.isEnabled = true
+            }
+
         }
 
     }
 
     private fun initView() {
-        hideNavigation()
         adapter = ImageAdapter(this)
         rvMain.adapter = adapter
         rvMain.layoutManager = GridLayoutManager(this,2)
 
         loading.hide()
+
+
 
     }
 
@@ -92,7 +102,6 @@ class SearchActivity : AppCompatActivity() {
         val spp = getSharedPreferences("splash", MODE_PRIVATE)
         val src = spp.getString("url","https://w.wallhaven.cc/full/l3/wallhaven-l36mpy.jpg")
         purity = spp.getString("purity","111").toString()
-        apikey = Meta.get(this,"apikey")
 
         val sp = getSharedPreferences("prefs", MODE_PRIVATE)
         cate = sp.getString("Categories","100").toString()
@@ -101,7 +110,7 @@ class SearchActivity : AppCompatActivity() {
         order = sp.getString("Order","desc").toString()
         topRange = sp.getString("TopRange","1M").toString()
         color = sp.getString("Color","").toString()
-
+        apikey = sp.getString("apikey","").toString()
 
     }
 
@@ -121,6 +130,10 @@ class SearchActivity : AppCompatActivity() {
         Log.i(TAG, "requestHot: $page")
         GlobalScope.launch {
             val doc = Bom.connect("https://wallhaven.cc/search?q=$q&page=$page&purity=$purity&apikey=$apikey&categories=$cate&sorting=$sort&order=$order&topRange=$topRange&colors=$color")
+            if (doc==null){
+                Toast.makeText(this@SearchActivity, "服务器异常，请稍后重试！", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
             val list = document.getElementsByTag(doc.html(),"figure")
             Log.i(TAG, "requestHot: 找到${list.size}条数据")
 
@@ -162,7 +175,6 @@ class SearchActivity : AppCompatActivity() {
 
 
     }
-
 
 
 

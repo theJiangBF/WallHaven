@@ -72,7 +72,11 @@ class ViewActivity : AppCompatActivity() {
         if (!TextUtils.isEmpty(url)) {
 
             GlobalScope.launch {
-                doc = Bom.connect(url)
+                doc = Bom.connect(url)!!
+                if (doc==null){
+                    Toast.makeText(this@ViewActivity, "服务器异常，请稍后重试！", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
                 src = document.getElementById(doc.html(),"wallpaper").attr("src")
 
                 val sp = getSharedPreferences("splash", MODE_PRIVATE)

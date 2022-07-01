@@ -3,17 +3,22 @@ package cool.thejiangbf.wallhaven
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.TextUtils
+import android.util.Log
 import android.view.View
 import android.widget.CompoundButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import kotlinx.android.synthetic.main.activity_preference.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class PreferenceActivity : AppCompatActivity() {
+    private val TAG = "壁纸天堂 * 偏好设置"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_preference)
@@ -29,6 +34,7 @@ class PreferenceActivity : AppCompatActivity() {
         cardLoading.visibility = View.VISIBLE
 
         val sp = getSharedPreferences("prefs", MODE_PRIVATE)
+        val ak = sp.getString("apikey","").toString()
         val cate = sp.getString("Categories","100").toString()
         val pure = sp.getString("Purity","100").toString()
         val sort = sp.getString("Sorting","relevance")
@@ -39,6 +45,7 @@ class PreferenceActivity : AppCompatActivity() {
         val arrCate = arrayOf(cate[0].toString().toInt(), cate[1].toString().toInt(), cate[2].toString().toInt())
         val arrPure = arrayOf(pure[0].toString().toInt(), pure[1].toString().toInt(), pure[2].toString().toInt())
 
+        etApikey.setText(ak)
         Categories.tag = arrCate
         Purity.tag = arrPure
         Sorting.tag = sort
@@ -95,6 +102,15 @@ class PreferenceActivity : AppCompatActivity() {
 
     private fun listener() {
 
+        etApikey.addTextChangedListener {
+            if (!TextUtils.isEmpty(it)){
+                cbPurity3.isEnabled = true
+            }else{
+                cbPurity3.isEnabled = false
+                cbPurity3.isChecked = false
+            }
+        }
+
         btnSave.setOnClickListener {
             cardLoading.visibility = View.VISIBLE
 
@@ -110,6 +126,7 @@ class PreferenceActivity : AppCompatActivity() {
             edit.putString("Order",Order.tag as String)
             edit.putString("TopRange",TopRange.tag as String)
             edit.putString("Color",tvColors.tag as String)
+            edit.putString("apikey",etApikey.text.toString())
 
             edit.commit()
 

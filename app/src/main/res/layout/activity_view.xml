@@ -28,17 +28,15 @@
         android:id="@+id/releativeAction"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:background="#2AFFFFFF"
-        >
+        android:background="@color/design_default_color_primary">
 
         <ImageView
             android:id="@+id/ivApply"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@drawable/ic_baseline_check_24"
-            android:layout_margin="8dp"
             android:layout_alignParentEnd="true"
-            />
+            android:layout_margin="8dp"
+            android:src="@drawable/ic_baseline_check_24" />
 
         <ImageView
             android:id="@+id/ivSave"

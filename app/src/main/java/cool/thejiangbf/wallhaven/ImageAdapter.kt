@@ -30,6 +30,11 @@ class ImageAdapter(val context: Context) : RecyclerView.Adapter<RecyclerView.Vie
         notifyDataSetChanged()
     }
 
+    fun clear(){
+        list.clear()
+        notifyDataSetChanged()
+    }
+
     fun insert(new:MutableList<Wallpaper>){
         list.addAll(new)
         notifyDataSetChanged()
