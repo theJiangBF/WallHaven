@@ -10,7 +10,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewAnimationUtils
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.animation.addListener
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +17,7 @@ import androidx.transition.Visibility.MODE_IN
 import androidx.transition.Visibility.MODE_OUT
 import com.bumptech.glide.Glide
 import cool.thejiangbf.wallhaven.weapon.Meta
-import cool.thejiangbf.wallhaven.weapon.browser
+import cool.thejiangbf.wallhaven.weapon.Bom
 import cool.thejiangbf.wallhaven.weapon.document
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
@@ -31,7 +30,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter : ImageAdapter
     private var pageIndex = 1
     private val maxIndex = 100
+    private var cate = "111"
     private var purity = "100"
+    private var sort = "toplist"
+    private var order = "desc"
+    private var topRange = "1M"
+    private var color = ""
     private var apikey = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,11 +89,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initData() {
-        val sp = getSharedPreferences("splash", MODE_PRIVATE)
-        val src = sp.getString("url","https://w.wallhaven.cc/full/l3/wallhaven-l36mpy.jpg")
-        purity = sp.getString("purity","111").toString()
+        val spp = getSharedPreferences("splash", MODE_PRIVATE)
+        val src = spp.getString("url","https://w.wallhaven.cc/full/l3/wallhaven-l36mpy.jpg")
+        purity = spp.getString("purity","111").toString()
         apikey = Meta.get(this,"apikey")
 
+        val sp = getSharedPreferences("prefs", MODE_PRIVATE)
+        cate = sp.getString("Categories","100").toString()
+        purity = sp.getString("Purity","100").toString()
+        sort = sp.getString("Sorting","relevance").toString()
+        order = sp.getString("Order","desc").toString()
+        topRange = sp.getString("TopRange","1M").toString()
+        color = sp.getString("Color","").toString()
 
 
         Glide.with(this).load(src).into(ivSplash)
@@ -99,9 +110,7 @@ class MainActivity : AppCompatActivity() {
         GlobalScope.launch {
             delay(3000)
             runOnUiThread {
-//                relativeSplash.visibility = View.GONE
                 createCircularRevealAnim(relativeSplash, MODE_OUT)
-
                 showNavigation()
             }
         }
@@ -158,7 +167,7 @@ class MainActivity : AppCompatActivity() {
     private fun requestHot(page:Int){
         Log.i(TAG, "requestHot: $page")
         GlobalScope.launch {
-            val doc = browser.connect("https://wallhaven.cc/hot?page=$page&purity=$purity&apikey=$apikey")
+            val doc = Bom.connect("https://wallhaven.cc/hot?page=$page&purity=$purity&apikey=$apikey&categories=$cate")
             val list = document.getElementsByTag(doc.html(),"figure")
             Log.i(TAG, "requestHot: 找到${list.size}条数据")
 

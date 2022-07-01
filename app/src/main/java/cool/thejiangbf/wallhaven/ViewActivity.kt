@@ -1,7 +1,6 @@
 package cool.thejiangbf.wallhaven
 
 import android.Manifest
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -24,14 +23,13 @@ import com.bumptech.glide.request.FutureTarget
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import cool.thejiangbf.wallhaven.weapon.Bmp
-import cool.thejiangbf.wallhaven.weapon.browser
+import cool.thejiangbf.wallhaven.weapon.Bom
 import cool.thejiangbf.wallhaven.weapon.document
 import kotlinx.android.synthetic.main.activity_view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.Document
 import java.io.File
-import java.util.*
 
 class ViewActivity : AppCompatActivity() {
     private val TAG = "壁纸天堂 * 大图"
@@ -64,7 +62,7 @@ class ViewActivity : AppCompatActivity() {
         if (url != null) {
 
             GlobalScope.launch {
-                doc = browser.connect(url)
+                doc = Bom.connect(url)
                 src = document.getElementById(doc.html(),"wallpaper").attr("src")
 
                 val sp = getSharedPreferences("splash", MODE_PRIVATE)
