@@ -1,5 +1,7 @@
 package cool.thejiangbf.wallhaven
 
+import android.app.Activity
+import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
@@ -7,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.util.Pair as P
 import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup
@@ -45,15 +48,22 @@ class ImageAdapter(val context: Context) : RecyclerView.Adapter<RecyclerView.Vie
         if (holder is VH){
             val wallpaper = list[position]
             with(holder){
-                Glide.with(context).load(wallpaper.snapshot).diskCacheStrategy(DiskCacheStrategy.ALL).into(ivSnapshot)
+                Glide.with(context).load(wallpaper.snapshot).placeholder(R.drawable.bad).diskCacheStrategy(DiskCacheStrategy.ALL).into(ivSnapshot)
                 tvSize.text = wallpaper.size
             }
 
             holder.itemView.setOnClickListener {
                 val intent = Intent(context,ViewActivity::class.java)
+
+                val pair1 = P<View, String>(holder.ivSnapshot, "big")
+                val options = ActivityOptions.makeSceneTransitionAnimation(context as Activity, pair1)
+
                 intent.putExtra("url",wallpaper.photo)
-                intent.putExtra("snap",Bmp.bmp2Bytes(holder.ivSnapshot.drawable.toBitmap()))
-                context.startActivity(intent)
+                if (holder.ivSnapshot.drawable!=null){
+                    intent.putExtra("snap",Bmp.bmp2Bytes(holder.ivSnapshot.drawable.toBitmap()))
+                }
+                context.startActivity(intent,options.toBundle())
+                context.overridePendingTransition(0,0)
             }
 
         }else if (holder is FootVH){

@@ -1,6 +1,7 @@
 package cool.thejiangbf.wallhaven
 
 import android.Manifest
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -11,6 +12,7 @@ import android.os.Environment
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -44,6 +46,7 @@ class ViewActivity : AppCompatActivity() {
     private var favs = ""
 
     private var url = ""
+    private var src = ""
     private lateinit var futureBitmap:FutureTarget<Bitmap>
 
 
@@ -62,7 +65,12 @@ class ViewActivity : AppCompatActivity() {
 
             GlobalScope.launch {
                 doc = browser.connect(url)
-                val src = document.getElementById(doc.html(),"wallpaper").attr("src")
+                src = document.getElementById(doc.html(),"wallpaper").attr("src")
+
+                val sp = getSharedPreferences("splash", MODE_PRIVATE)
+                val edit = sp.edit()
+                edit.putString("url",src)
+                edit.apply()
 
                 val dl = document.getElementsByTag(doc.html(),"dl")[0]
                 val dds = document.getElementsByTag(dl.html(),"dd")
@@ -139,38 +147,60 @@ class ViewActivity : AppCompatActivity() {
     private fun save(){
         val check = ActivityCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (check == PackageManager.PERMISSION_GRANTED){
+            Log.i(TAG, "save: 有权限")
             val wallHaven = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"WallHaven")
             if (!wallHaven.exists()){
-                wallHaven.mkdir()
+                val mk = wallHaven.mkdir()
+                Log.i(TAG, "save: 文件夹不存在,正在创建,结果$mk")
             }
             val name = "${uploader}_${category}_${purity}_${System.currentTimeMillis()}.png"
 
 
             futureBitmap = Glide.with(this).asBitmap().listener(object : RequestListener<Bitmap> {
                 override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Bitmap>?, isFirstResource: Boolean): Boolean {
-                    Toast.makeText(this@ViewActivity, "图片保存失败,网络错误!", Toast.LENGTH_SHORT).show()
-                    return false
-                }
-
-                override fun onResourceReady(resource: Bitmap?, model: Any?, target: Target<Bitmap>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-                    if (this@ViewActivity::futureBitmap.isInitialized){
-                        val exp = Bmp.save(futureBitmap.get() ,File(wallHaven,name))
-                        if (exp == null){
-                            Toast.makeText(this@ViewActivity, "图片保存成功!", Toast.LENGTH_SHORT).show()
-                        }else {
-                            Toast.makeText(this@ViewActivity, "保存失败:${exp.message}", Toast.LENGTH_SHORT).show()
-                        }
-                    }else{
-                        Toast.makeText(this@ViewActivity, "请稍后重试!", Toast.LENGTH_SHORT).show()
+                    Log.w(TAG, "onLoadFailed: 网络异常,保存失败!")
+                    runOnUiThread {
+                        loading.hide()
+                        Toast.makeText(this@ViewActivity, "图片保存失败,网络错误!", Toast.LENGTH_SHORT).show()
                     }
                     return false
                 }
 
-            }) .load(url).submit()
+                override fun onResourceReady(resource: Bitmap?, model: Any?, target: Target<Bitmap>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                    Log.i(TAG, "onResourceReady: ")
+                    return false
+                }
 
 
+            }) .load(src).submit()
+
+
+            if (this@ViewActivity::futureBitmap.isInitialized){
+                val exp = Bmp.save(futureBitmap.get() ,File(wallHaven,name))
+
+                runOnUiThread {
+                    loading.hide()
+                    if (exp == null){
+                        Log.i(TAG, "onResourceReady: 保存成功")
+                        Toast.makeText(this@ViewActivity, "图片保存成功!", Toast.LENGTH_SHORT).show()
+                    }else {
+                        Log.w(TAG, "onResourceReady: 保存失败啦", )
+                        Toast.makeText(this@ViewActivity, "保存失败:${exp.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+            }else{
+                Log.w(TAG, "onResourceReady: futureBitmap没有初始化")
+                runOnUiThread {
+                    loading.hide()
+                    Toast.makeText(this@ViewActivity, "请稍后重试!", Toast.LENGTH_SHORT).show()
+                }
+            }
         }else{
-            Toast.makeText(this, "保存失败,没有权限!", Toast.LENGTH_LONG).show()
+            Log.w(TAG, "save: 没有权限")
+            runOnUiThread {
+                Toast.makeText(this, "保存失败,没有权限!", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -184,11 +214,21 @@ class ViewActivity : AppCompatActivity() {
         Glide.with(this).pauseAllRequests()
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finishAfterTransition()
+        overridePendingTransition(0,0)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
             R.id.save -> {
                 Log.i(TAG, "onOptionsItemSelected: 保存图片")
-                save()
+                loading.visibility = View.VISIBLE
+                loading.show()
+                GlobalScope.launch {
+                    save()
+                }
             }
         }
         return super.onOptionsItemSelected(item)

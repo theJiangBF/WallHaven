@@ -1,18 +1,28 @@
 package cool.thejiangbf.wallhaven
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewAnimationUtils
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.animation.addListener
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Visibility.MODE_IN
+import androidx.transition.Visibility.MODE_OUT
+import com.bumptech.glide.Glide
+import cool.thejiangbf.wallhaven.weapon.Meta
 import cool.thejiangbf.wallhaven.weapon.browser
 import cool.thejiangbf.wallhaven.weapon.document
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -21,13 +31,22 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter : ImageAdapter
     private var pageIndex = 1
     private val maxIndex = 100
+    private var purity = "100"
+    private var apikey = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        adapter = ImageAdapter(this)
-        rvMain.adapter = adapter
-        rvMain.layoutManager = GridLayoutManager(this,2)
+
+        initView()
+
+        listener()
+
+        initData()
+
+    }
+
+    private fun listener() {
 
         rvMain.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             var isSlidingUpward = false
@@ -56,9 +75,73 @@ class MainActivity : AppCompatActivity() {
 
         })
 
+    }
+
+    private fun initView() {
+        hideNavigation()
+        adapter = ImageAdapter(this)
+        rvMain.adapter = adapter
+        rvMain.layoutManager = GridLayoutManager(this,2)
+    }
+
+    private fun initData() {
+        val sp = getSharedPreferences("splash", MODE_PRIVATE)
+        val src = sp.getString("url","https://w.wallhaven.cc/full/l3/wallhaven-l36mpy.jpg")
+        purity = sp.getString("purity","111").toString()
+        apikey = Meta.get(this,"apikey")
+
+
+
+        Glide.with(this).load(src).into(ivSplash)
+
         requestHot(1)
 
+        GlobalScope.launch {
+            delay(3000)
+            runOnUiThread {
+//                relativeSplash.visibility = View.GONE
+                createCircularRevealAnim(relativeSplash, MODE_OUT)
 
+                showNavigation()
+            }
+        }
+
+    }
+
+
+    /**
+     * 创建圆形揭示层动画
+     */
+    private fun createCircularRevealAnim(view:View, mode: Int) {
+        //设置圆心坐标和半径
+        val mCx: Int = (view.left + view.right) / 2 //获取x坐标
+        val mCy: Int = (view.top + view.bottom) / 2 //获取y坐标
+        //设置圆角半径
+        val mRadius: Int = (view.width / 2).coerceAtLeast(view.height / 2)
+        val anim: Animator = if (mode == MODE_IN) {
+            //揭露动画创建，五个参数
+            //param1:执行动画的视图；param2:动画开始的x坐标；param3:动画开始的y坐标；param4:动画开始的圆角半径；param5：动画结束的圆角半径
+            ViewAnimationUtils.createCircularReveal(view, mCx, mCy, 0f, mRadius.toFloat())
+        } else {
+            ViewAnimationUtils.createCircularReveal(view, mCx, mCy, mRadius.toFloat(), 0f)
+        }
+
+
+        //添加监听器来保证开始动画之前，布局不会显示，也可以添加动画退出监听，让布局隐藏
+        anim.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationStart(animation: Animator?) {
+                super.onAnimationStart(animation)
+                Log.d(TAG, "动画开始")
+                view.visibility = View.VISIBLE
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                super.onAnimationEnd(animation)
+                view.visibility = View.INVISIBLE
+            }
+        })
+        anim.duration = 500 //设置动画时长
+        anim.start() //开启动画
     }
 
     private fun loadingMore() {
@@ -69,20 +152,13 @@ class MainActivity : AppCompatActivity() {
             adapter.setLoadState(ImageAdapter.LOAD_COMPLETE)
             adapter.notifyDataSetChanged()
         }
-//        if (searchList.size() < count) {
-//            adapter.setLoadState(ImageAdapter.LOADING)
-//        } else {
-//            adapter.setLoadState(ImageAdapter.LOAD_END)
-//        }
+
     }
-
-
-
 
     private fun requestHot(page:Int){
         Log.i(TAG, "requestHot: $page")
         GlobalScope.launch {
-            val doc = browser.connect("https://wallhaven.cc/hot?page=$page")
+            val doc = browser.connect("https://wallhaven.cc/hot?page=$page&purity=$purity&apikey=$apikey")
             val list = document.getElementsByTag(doc.html(),"figure")
             Log.i(TAG, "requestHot: 找到${list.size}条数据")
 
@@ -112,11 +188,34 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun hideNavigation(){
+        this.window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+
+        supportActionBar?.hide()
+
+
+    }
+
+    private fun showNavigation(){
+        this.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        supportActionBar?.show()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
             R.id.hot -> {
                 Log.i(TAG, "onOptionsItemSelected: 热门!!")
                 requestHot(1)
+            }
+            R.id.about -> {
+                startActivity(Intent(this,AboutActivity::class.java))
+            }
+            R.id.preference -> {
+                startActivity(Intent(this,PreferenceActivity::class.java))
             }
         }
         return super.onOptionsItemSelected(item)

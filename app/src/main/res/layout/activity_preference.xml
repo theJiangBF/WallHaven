@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF"
+    tools:context=".PreferenceActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingHorizontal="32dp"
+            android:paddingTop="32dp"
+            >
+            <TextView
+                android:id="@+id/Categories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Categories"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <CheckBox
+                    android:id="@+id/cbVate1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="general"
+                    />
+                <CheckBox
+                    android:id="@+id/cbVate2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="anime"
+                    />
+                <CheckBox
+                    android:id="@+id/cbVate3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="people"
+                    />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/Purity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Purity"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <CheckBox
+                    android:id="@+id/cbPurity1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="sfw"
+                    />
+                <CheckBox
+                    android:id="@+id/cbPurity2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="sketchy"
+                    />
+                <CheckBox
+                    android:id="@+id/cbPurity3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="nsfw"
+                    />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/Sorting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sorting"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                />
+            <RadioGroup
+                android:id="@+id/rgSort"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton android:id="@+id/rbRele" style="@style/pref_h" android:text="相关"/>
+                <RadioButton android:id="@+id/rbRand" style="@style/pref_h" android:text="随机"/>
+                <RadioButton android:id="@+id/rbViews" style="@style/pref_h" android:text="访问"/>
+                <RadioButton android:id="@+id/rbFav" style="@style/pref_h" android:text="收藏"/>
+                <RadioButton android:id="@+id/rbTop" style="@style/pref_h" android:text="热门"/>
+
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/Order"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Order"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                />
+            <RadioGroup
+                android:id="@+id/rgOrder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton android:id="@+id/rbDesc" style="@style/pref_h" android:text="desc"/>
+                <RadioButton android:id="@+id/rbAsc" style="@style/pref_h" android:text="asc"/>
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/TopRange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Top Range"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                />
+            <RadioGroup
+                android:id="@+id/rgTopRange"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+                <RadioButton android:id="@+id/rbRange1" style="@style/pref_h" android:text="1d"/>
+                <RadioButton android:id="@+id/rbRange2" style="@style/pref_h" android:text="3d"/>
+                <RadioButton android:id="@+id/rbRange3" style="@style/pref_h" android:text="1w"/>
+                <RadioButton android:id="@+id/rbRange4" style="@style/pref_h" android:text="1M"/>
+                <RadioButton android:id="@+id/rbRange7" style="@style/pref_h" android:text="1y"/>
+            </RadioGroup>
+
+
+            <TextView
+                android:id="@+id/tvColors"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Colors"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                />
+            <LinearLayout
+                android:id="@+id/linearColors"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="32dp"
+                >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
+                    <TextView style="@style/pref_h_padding" android:text="660000" android:textColor="#660000" />
+                    <TextView style="@style/pref_h_padding" android:text="990000" android:textColor="#990000" />
+                    <TextView style="@style/pref_h_padding" android:text="cc0000" android:textColor="#cc0000" />
+                    <TextView style="@style/pref_h_padding" android:text="cc3333" android:textColor="#cc3333" />
+                    <TextView style="@style/pref_h_padding" android:text="ea4c88" android:textColor="#ea4c88" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView style="@style/pref_h_padding" android:text="993399" android:textColor="#993399" />
+                    <TextView style="@style/pref_h_padding" android:text="663399" android:textColor="#663399" />
+                    <TextView style="@style/pref_h_padding" android:text="333399" android:textColor="#333399" />
+                    <TextView style="@style/pref_h_padding" android:text="0066cc" android:textColor="#0066cc" />
+                    <TextView style="@style/pref_h_padding" android:text="0099cc" android:textColor="#0099cc" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView style="@style/pref_h_padding" android:text="66cccc" android:textColor="#66cccc" />
+                    <TextView style="@style/pref_h_padding" android:text="77cc33" android:textColor="#77cc33" />
+                    <TextView style="@style/pref_h_padding" android:text="669900" android:textColor="#669900" />
+                    <TextView style="@style/pref_h_padding" android:text="336600" android:textColor="#336600" />
+                    <TextView style="@style/pref_h_padding" android:text="666600" android:textColor="#666600" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView style="@style/pref_h_padding" android:text="999900" android:textColor="#999900" />
+                    <TextView style="@style/pref_h_padding" android:text="cccc33" android:textColor="#cccc33" />
+                    <TextView style="@style/pref_h_padding" android:text="ffff00" android:textColor="#ffff00" />
+                    <TextView style="@style/pref_h_padding" android:text="ffcc33" android:textColor="#ffcc33" />
+                    <TextView style="@style/pref_h_padding" android:text="ff9900" android:textColor="#ff9900" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView style="@style/pref_h_padding" android:text="ff6600" android:textColor="#ff6600" />
+                    <TextView style="@style/pref_h_padding" android:text="cc6633" android:textColor="#cc6633" />
+                    <TextView style="@style/pref_h_padding" android:text="996633" android:textColor="#996633" />
+                    <TextView style="@style/pref_h_padding" android:text="663300" android:textColor="#663300" />
+                    <TextView style="@style/pref_h_padding" android:text="000000" android:textColor="#000000" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView style="@style/pref_h_padding" android:text="999999" android:textColor="#999999" />
+                    <TextView style="@style/pref_h_padding" android:text="cccccc" android:textColor="#cccccc" />
+                    <TextView style="@style/pref_h_padding" android:background="#000" android:text="ffffff" android:textColor="#ffffff" />
+                    <TextView style="@style/pref_h_padding" android:text="424153" android:textColor="#424153" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="保存"
+                android:layout_marginHorizontal="64dp"
+                android:layout_marginVertical="32dp"
+                />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
