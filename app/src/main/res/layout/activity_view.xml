@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ViewActivity"
-    android:background="#000"
+    android:background="#CD000000"
     >
 
     <cool.thejiangbf.wallhaven.PinchImageView
@@ -23,6 +23,34 @@
         android:layout_height="100dp"
         android:layout_centerInParent="true"
         style="?android:attr/progressBarStyleLarge"/>
+
+    <RelativeLayout
+        android:id="@+id/releativeAction"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="#2AFFFFFF"
+        >
+
+        <ImageView
+            android:id="@+id/ivApply"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_baseline_check_24"
+            android:layout_margin="8dp"
+            android:layout_alignParentEnd="true"
+            />
+
+        <ImageView
+            android:id="@+id/ivSave"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_toLeftOf="@id/ivApply"
+            android:src="@drawable/ic_baseline_save_alt_24" />
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/linearProperties"

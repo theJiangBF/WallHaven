@@ -1,20 +1,25 @@
 package cool.thejiangbf.wallhaven
 
 import android.Manifest
+import android.app.WallpaperManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import androidx.appcompat.app.AppCompatActivity
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.text.TextUtils
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -30,6 +35,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.Document
 import java.io.File
+
 
 class ViewActivity : AppCompatActivity() {
     private val TAG = "壁纸天堂 * 大图"
@@ -50,8 +56,12 @@ class ViewActivity : AppCompatActivity() {
 
 
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        supportActionBar?.hide()
+
         setContentView(R.layout.activity_view)
 
         url = intent.getStringExtra("url").toString()
@@ -59,7 +69,7 @@ class ViewActivity : AppCompatActivity() {
         val bmp = snap?.let { Bmp.byteArray2Bmp(it) }
         Log.i(TAG, "onCreate: 收到url:$url")
 
-        if (url != null) {
+        if (!TextUtils.isEmpty(url)) {
 
             GlobalScope.launch {
                 doc = Bom.connect(url)
@@ -113,6 +123,7 @@ class ViewActivity : AppCompatActivity() {
                                 Log.i(TAG, "onLoadFailed: 图片加载完成")
                                 loading.hide()
                                 linearProperties.startAnimation(AnimationUtils.loadAnimation(this@ViewActivity,R.anim.anim_prop_show))
+                                releativeAction.startAnimation(AnimationUtils.loadAnimation(this@ViewActivity,R.anim.anim_prop_show_act))
                                 hiding = false
                                 return false
                             }
@@ -129,16 +140,31 @@ class ViewActivity : AppCompatActivity() {
             hiding = if (!hiding){
                 Log.i(TAG, "onCreate: 隐藏!!")
                 linearProperties.startAnimation(AnimationUtils.loadAnimation(this,R.anim.anim_prop_hide))
+                releativeAction.startAnimation(AnimationUtils.loadAnimation(this,R.anim.anim_prop_hide_act))
                 true
             }else {
                 Log.i(TAG, "onCreate: 显示!!")
                 linearProperties.startAnimation(AnimationUtils.loadAnimation(this,R.anim.anim_prop_show))
+                releativeAction.startAnimation(AnimationUtils.loadAnimation(this,R.anim.anim_prop_show_act))
                 false
             }
 
         }
 
+        ivApply.setOnClickListener {
+            wallpaper()
+        }
+
+        ivSave.setOnClickListener {
+            loading.visibility = View.VISIBLE
+            loading.show()
+            GlobalScope.launch {
+                save()
+            }
+        }
+
         linearProperties.startAnimation(AnimationUtils.loadAnimation(this,R.anim.anim_prop_hide))
+        releativeAction.startAnimation(AnimationUtils.loadAnimation(this,R.anim.anim_prop_hide))
 
     }
 
@@ -182,7 +208,7 @@ class ViewActivity : AppCompatActivity() {
                         Log.i(TAG, "onResourceReady: 保存成功")
                         Toast.makeText(this@ViewActivity, "图片保存成功!", Toast.LENGTH_SHORT).show()
                     }else {
-                        Log.w(TAG, "onResourceReady: 保存失败啦", )
+                        Log.w(TAG, "onResourceReady: 保存失败啦")
                         Toast.makeText(this@ViewActivity, "保存失败:${exp.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -202,6 +228,25 @@ class ViewActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun wallpaper(){
+        Log.i(TAG, "wallpaper: 设置中...")
+        Toast.makeText(this, "设置中...", Toast.LENGTH_SHORT).show()
+        GlobalScope.launch {
+            val wpm = getSystemService(Context.WALLPAPER_SERVICE) as WallpaperManager
+            val mBitmap = ivBig.drawable.toBitmap() //path为绝对路径
+            wpm.setBitmap(mBitmap, Rect(0, 0, mBitmap.width, mBitmap.height), true)
+            Log.i(TAG, "wallpaper: 设置成功")
+
+            runOnUiThread {
+                Toast.makeText(this@ViewActivity, "设置成功!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+
+
+    }
+
     override fun onResume() {
         super.onResume()
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),0x7f)
@@ -218,23 +263,37 @@ class ViewActivity : AppCompatActivity() {
         overridePendingTransition(0,0)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
-            R.id.save -> {
-                Log.i(TAG, "onOptionsItemSelected: 保存图片")
-                loading.visibility = View.VISIBLE
-                loading.show()
-                GlobalScope.launch {
-                    save()
-                }
-            }
-        }
-        return super.onOptionsItemSelected(item)
+    private fun hideNavigation(){
+        this.window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+
+        supportActionBar?.hide()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.big,menu)
-        return super.onCreateOptionsMenu(menu)
-    }
+//    @RequiresApi(Build.VERSION_CODES.N)
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        when(item.itemId){
+//            R.id.save -> {
+//                Log.i(TAG, "onOptionsItemSelected: 保存图片")
+//                loading.visibility = View.VISIBLE
+//                loading.show()
+//                GlobalScope.launch {
+//                    save()
+//                }
+//            }
+//            R.id.apply -> {
+//                wallpaper()
+//            }
+//        }
+//        return super.onOptionsItemSelected(item)
+//    }
+//
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        menuInflater.inflate(R.menu.big,menu)
+//        return super.onCreateOptionsMenu(menu)
+//    }
 
 }

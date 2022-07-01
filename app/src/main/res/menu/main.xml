@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/hot" android:title="热门" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/hot" android:title="热门" android:icon="@drawable/ic_baseline_whatshot_24" app:showAsAction="ifRoom" />
+    <item android:id="@+id/search" android:title="搜索" android:icon="@drawable/ic_baseline_search_24" app:showAsAction="ifRoom" />
     <item android:id="@+id/preference" android:title="偏好设置" />
     <group>
         <item android:id="@+id/about" android:title="关于" />

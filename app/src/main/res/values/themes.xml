@@ -16,4 +16,11 @@
         <item name="android:windowBackground">#000</item>
 
     </style>
+
+    <style name="Theme.WallHaven.big" parent="Theme.WallHaven">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowActionBar">@null</item>
+    </style>
+
 </resources>

@@ -1,32 +1,22 @@
 package cool.thejiangbf.wallhaven
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import android.view.ViewAnimationUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Visibility.MODE_IN
-import androidx.transition.Visibility.MODE_OUT
-import com.bumptech.glide.Glide
 import cool.thejiangbf.wallhaven.weapon.Meta
 import cool.thejiangbf.wallhaven.weapon.Bom
 import cool.thejiangbf.wallhaven.weapon.document
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class MainActivity : AppCompatActivity() {
-    private val TAG = "壁纸天堂 * 独家珍藏"
+class SearchActivity : AppCompatActivity() {
+    private val TAG = "壁纸天堂 * 搜索"
     private lateinit var adapter : ImageAdapter
     private var pageIndex = 1
     private val maxIndex = 100
@@ -40,7 +30,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        hideNavigation()
+        setContentView(R.layout.activity_search)
 
         initView()
 
@@ -79,6 +70,12 @@ class MainActivity : AppCompatActivity() {
 
         })
 
+        ivSearch.setOnClickListener {
+            pageIndex = 1
+            search(etSearch.text.toString(),pageIndex)
+            loading.show()
+        }
+
     }
 
     private fun initView() {
@@ -86,6 +83,9 @@ class MainActivity : AppCompatActivity() {
         adapter = ImageAdapter(this)
         rvMain.adapter = adapter
         rvMain.layoutManager = GridLayoutManager(this,2)
+
+        loading.hide()
+
     }
 
     private fun initData() {
@@ -103,71 +103,24 @@ class MainActivity : AppCompatActivity() {
         color = sp.getString("Color","").toString()
 
 
-        Glide.with(this).load(src).into(ivSplash)
-
-        requestHot(1)
-
-        GlobalScope.launch {
-            delay(3000)
-            runOnUiThread {
-                createCircularRevealAnim(relativeSplash, MODE_OUT)
-                showNavigation()
-            }
-        }
-
     }
 
-
-    /**
-     * 创建圆形揭示层动画
-     */
-    private fun createCircularRevealAnim(view:View, mode: Int) {
-        //设置圆心坐标和半径
-        val mCx: Int = (view.left + view.right) / 2 //获取x坐标
-        val mCy: Int = (view.top + view.bottom) / 2 //获取y坐标
-        //设置圆角半径
-        val mRadius: Int = (view.width / 2).coerceAtLeast(view.height / 2)
-        val anim: Animator = if (mode == MODE_IN) {
-            //揭露动画创建，五个参数
-            //param1:执行动画的视图；param2:动画开始的x坐标；param3:动画开始的y坐标；param4:动画开始的圆角半径；param5：动画结束的圆角半径
-            ViewAnimationUtils.createCircularReveal(view, mCx, mCy, 0f, mRadius.toFloat())
-        } else {
-            ViewAnimationUtils.createCircularReveal(view, mCx, mCy, mRadius.toFloat(), 0f)
-        }
-
-
-        //添加监听器来保证开始动画之前，布局不会显示，也可以添加动画退出监听，让布局隐藏
-        anim.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationStart(animation: Animator?) {
-                super.onAnimationStart(animation)
-                Log.d(TAG, "动画开始")
-                view.visibility = View.VISIBLE
-            }
-
-            override fun onAnimationEnd(animation: Animator?) {
-                super.onAnimationEnd(animation)
-                view.visibility = View.INVISIBLE
-            }
-        })
-        anim.duration = 500 //设置动画时长
-        anim.start() //开启动画
-    }
 
     private fun loadingMore() {
         adapter.setLoadState(ImageAdapter.LOADING) //FootView显示状态
         if (pageIndex < maxIndex) {
             pageIndex++
-            requestHot(pageIndex)
+            search(etSearch.text.toString(),  pageIndex)
             adapter.setLoadState(ImageAdapter.LOAD_COMPLETE)
             adapter.notifyDataSetChanged()
         }
 
     }
 
-    private fun requestHot(page:Int){
+    private fun search(q:String, page:Int){
         Log.i(TAG, "requestHot: $page")
         GlobalScope.launch {
-            val doc = Bom.connect("https://wallhaven.cc/hot?page=$page&purity=$purity&apikey=$apikey&categories=$cate")
+            val doc = Bom.connect("https://wallhaven.cc/search?q=$q&page=$page&purity=$purity&apikey=$apikey&categories=$cate&sorting=$sort&order=$order&topRange=$topRange&colors=$color")
             val list = document.getElementsByTag(doc.html(),"figure")
             Log.i(TAG, "requestHot: 找到${list.size}条数据")
 
@@ -191,6 +144,7 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread{
                 adapter.insert(walls)
                 relativeEmpty.visibility = View.GONE
+                loading.hide()
             }
 
         }
@@ -209,32 +163,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun showNavigation(){
-        this.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-        supportActionBar?.show()
-    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
-            R.id.hot -> {
-                Log.i(TAG, "onOptionsItemSelected: 热门!!")
-                requestHot(1)
-            }
-            R.id.about -> {
-                startActivity(Intent(this,AboutActivity::class.java))
-            }
-            R.id.preference -> {
-                startActivity(Intent(this,PreferenceActivity::class.java))
-            }
-            R.id.search -> {
-                startActivity(Intent(this,SearchActivity::class.java))
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main,menu)
-        return super.onCreateOptionsMenu(menu)
-    }
+
 }
