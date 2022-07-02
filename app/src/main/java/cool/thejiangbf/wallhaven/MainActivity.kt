@@ -3,14 +3,17 @@ package cool.thejiangbf.wallhaven
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewAnimationUtils
+import android.view.*
+import android.widget.CompoundButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,8 +22,17 @@ import androidx.transition.Visibility.MODE_OUT
 import com.bumptech.glide.Glide
 import cool.thejiangbf.wallhaven.weapon.Meta
 import cool.thejiangbf.wallhaven.weapon.Bom
+import cool.thejiangbf.wallhaven.weapon.Prefs
+import cool.thejiangbf.wallhaven.weapon.Prefs.apikey
+import cool.thejiangbf.wallhaven.weapon.Prefs.cate
+import cool.thejiangbf.wallhaven.weapon.Prefs.order
+import cool.thejiangbf.wallhaven.weapon.Prefs.purity
+import cool.thejiangbf.wallhaven.weapon.Prefs.sort
+import cool.thejiangbf.wallhaven.weapon.Prefs.topRange
+import cool.thejiangbf.wallhaven.weapon.Prefs.color
 import cool.thejiangbf.wallhaven.weapon.document
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_preference.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -31,13 +43,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter : ImageAdapter
     private var pageIndex = 1
     private val maxIndex = 100
-    private var cate = "111"
-    private var purity = "100"
-    private var sort = "toplist"
-    private var order = "desc"
-    private var topRange = "1M"
-    private var color = ""
-    private var apikey = ""
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,8 +52,11 @@ class MainActivity : AppCompatActivity() {
         initView()
 
         listener()
+        prefListener()
+
 
         initData()
+        initPrefData()
 
     }
 
@@ -82,6 +91,124 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
+    private fun prefListener() {
+
+        etApikey.addTextChangedListener {
+            if (!TextUtils.isEmpty(it)){
+                cbPurity3.isEnabled = true
+            }else{
+                cbPurity3.isEnabled = false
+                cbPurity3.isChecked = false
+            }
+            apikey = it.toString().trim()
+        }
+
+        btnSave.setOnClickListener {
+            cardLoading.visibility = View.VISIBLE
+
+            val sp = getSharedPreferences("prefs", MODE_PRIVATE)
+            val edit = sp.edit()
+
+            val cate = Categories.tag as Array<Int>
+            val pure = Purity.tag as Array<Int>
+
+            edit.putString("Categories","${cate[0]}${cate[1]}${cate[2]}")
+            edit.putString("Purity","${pure[0]}${pure[1]}${pure[2]}")
+            edit.putString("Sorting",Sorting.tag as String)
+            edit.putString("Order",Order.tag as String)
+            edit.putString("TopRange",TopRange.tag as String)
+            edit.putString("Color",tvColors.tag as String)
+            edit.putString("apikey",etApikey.text.toString())
+
+            edit.commit()
+
+
+
+            Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show()
+            GlobalScope.launch {
+                delay(1000)
+                runOnUiThread {
+                    cardLoading.visibility = View.GONE
+                }
+                delay(300)
+                runOnUiThread {
+                    drawer.closeDrawers()
+                }
+            }
+        }
+
+        cbCate1.setOnCheckedChangeListener(CategoryListener(Categories))
+        cbCate2.setOnCheckedChangeListener(CategoryListener(Categories))
+        cbCate3.setOnCheckedChangeListener(CategoryListener(Categories))
+
+        cbPurity1.setOnCheckedChangeListener(PurityListener(Purity))
+        cbPurity2.setOnCheckedChangeListener(PurityListener(Purity))
+        cbPurity3.setOnCheckedChangeListener(PurityListener(Purity))
+
+        rgSort.setOnCheckedChangeListener { _, checkedId ->
+            when(checkedId){
+                R.id.rbRele -> {
+                    Sorting.tag = "relevance"
+                }
+                R.id.rbRand -> {
+                    Sorting.tag = "random"
+                }
+                R.id.rbViews -> {
+                    Sorting.tag = "views"
+                }
+                R.id.rbFav -> {
+                    Sorting.tag = "favorites"
+                }
+                R.id.rbTop -> {
+                    Sorting.tag = "toplist"
+                    rgTopRange.isEnabled = true
+                }
+            }
+            sort = Sorting.tag.toString()
+            Sorting.text = "Sorting: ${Sorting.tag}"
+        }
+
+        rgOrder.setOnCheckedChangeListener { _, checkedId ->
+            when(checkedId){
+                R.id.rbDesc -> {
+                    Order.tag = "desc"
+                    Order.text = "Order: desc"
+                }
+                R.id.rbAsc -> {
+                    Order.tag = "asc"
+                    Order.text = "Order: asc"
+                }
+            }
+            order = Order.tag.toString()
+        }
+
+        rgTopRange.setOnCheckedChangeListener { _, checkedId ->
+            when(checkedId){
+                R.id.rbRange1 -> { TopRange.tag = "1d" }
+                R.id.rbRange2 -> { TopRange.tag = "3d" }
+                R.id.rbRange3 -> { TopRange.tag = "1w" }
+                R.id.rbRange4 -> { TopRange.tag = "1M" }
+                R.id.rbRange7 -> { TopRange.tag = "1y" }
+            }
+            TopRange.text = "Top Range: ${TopRange.tag}"
+            topRange = TopRange.tag.toString()
+
+        }
+
+
+
+        for(i in 0 until linearColors.childCount){
+            val line = linearColors.getChildAt(i) as LinearLayout
+            for (j in 0 until line.childCount){
+                val textView = line.getChildAt(j) as TextView
+                textView.setOnClickListener(ColorListener(linearColors, tvColors))
+            }
+        }
+
+    }
+
+
     private fun initView() {
         hideNavigation()
         adapter = ImageAdapter(this)
@@ -92,7 +219,6 @@ class MainActivity : AppCompatActivity() {
     private fun initData() {
         val spp = getSharedPreferences("splash", MODE_PRIVATE)
         val src = spp.getString("url","https://w.wallhaven.cc/full/l3/wallhaven-l36mpy.jpg")
-        purity = spp.getString("purity","111").toString()
 
         val sp = getSharedPreferences("prefs", MODE_PRIVATE)
         cate = sp.getString("Categories","100").toString()
@@ -113,6 +239,69 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 createCircularRevealAnim(relativeSplash, MODE_OUT)
                 showNavigation()
+            }
+        }
+
+    }
+
+
+    private fun initPrefData() {
+        cardLoading.visibility = View.VISIBLE
+
+
+        val arrCate = arrayOf(cate[0].toString().toInt(), cate[1].toString().toInt(), cate[2].toString().toInt())
+        val arrPure = arrayOf(purity[0].toString().toInt(), purity[1].toString().toInt(), purity[2].toString().toInt())
+
+        etApikey.setText(apikey)
+        Categories.tag = arrCate
+        Purity.tag = arrPure
+        Sorting.tag = sort
+        Order.tag = order
+        TopRange.tag = topRange
+        tvColors.tag = color
+
+        rgTopRange.isEnabled = false
+
+
+        if (arrCate[0] == 1){ cbCate1.isChecked = true }
+        if (arrCate[1] == 1){ cbCate2.isChecked = true }
+        if (arrCate[2] == 1){ cbCate3.isChecked = true }
+
+        if (arrPure[0] == 1){ cbPurity1.isChecked = true }
+        if (arrPure[1] == 1){ cbPurity2.isChecked = true }
+        if (arrPure[2] == 1){ cbPurity3.isChecked = true }
+
+        when(sort){
+            "relevance" -> { rbRele.isChecked = true }
+            "random" -> { rbRand.isChecked = true }
+            "views" -> { rbViews.isChecked = true }
+            "favorites" -> { rbFav.isChecked = true }
+            "toplist" -> { rbTop.isChecked = true }
+        }
+
+        if (order == "desc"){
+            rbDesc.isChecked = true
+        }else{
+            rbAsc.isChecked = true
+        }
+
+        when(topRange){
+            "1d" -> {rbRange1.isChecked = true}
+            "3d" -> {rbRange2.isChecked = true}
+            "1w" -> {rbRange3.isChecked = true}
+            "1M" -> {rbRange4.isChecked = true}
+            "1y" -> {rbRange7.isChecked = true}
+        }
+
+        tvColors.text = "Colors: #$color"
+        if (color?.length==6){
+            linearColors.setBackgroundColor(Color.parseColor("#$color"))
+        }
+
+        GlobalScope.launch {
+            delay(1000)
+            runOnUiThread {
+                cardLoading.visibility = View.GONE
             }
         }
 
@@ -168,7 +357,7 @@ class MainActivity : AppCompatActivity() {
     private fun requestHot(page:Int){
         Log.i(TAG, "requestHot: $page")
         GlobalScope.launch {
-            val doc = Bom.connect("https://wallhaven.cc/hot?page=$page&purity=$purity&apikey=$apikey&categories=$cate")
+            val doc = Bom.connect("https://wallhaven.cc/hot?page=$page&purity=$purity&apikey=$apikey&categories=$cate&topRange=$topRange&sorting=$sort&order=$order&colors=$color")
             if (doc==null){
                 Toast.makeText(this@MainActivity, "服务器异常，请稍后重试！", Toast.LENGTH_SHORT).show()
                 return@launch
@@ -223,13 +412,11 @@ class MainActivity : AppCompatActivity() {
         when(item.itemId){
             R.id.hot -> {
                 Log.i(TAG, "onOptionsItemSelected: 热门!!")
+                adapter.clear()
                 requestHot(1)
             }
             R.id.about -> {
                 startActivity(Intent(this,AboutActivity::class.java))
-            }
-            R.id.preference -> {
-                startActivity(Intent(this,PreferenceActivity::class.java))
             }
             R.id.search -> {
                 startActivity(Intent(this,SearchActivity::class.java))
@@ -242,4 +429,57 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.main,menu)
         return super.onCreateOptionsMenu(menu)
     }
+
+
+    private class CategoryListener(private val textView: TextView): CompoundButton.OnCheckedChangeListener{
+        override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
+            val arr:Array<Int> = textView.tag as Array<Int>
+            when(buttonView?.id){
+                R.id.cbCate1 -> { arr[0] = if (isChecked) 1 else 0 }
+                R.id.cbCate2 -> { arr[1] = if (isChecked) 1 else 0 }
+                R.id.cbCate3 -> { arr[2] = if (isChecked) 1 else 0 }
+            }
+            cate = "${arr[0]}${arr[1]}${arr[2]}"
+            textView.text = "Categories: $cate"
+        }
+    }
+
+    private class PurityListener(private val textView: TextView): CompoundButton.OnCheckedChangeListener{
+        override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
+            val arr:Array<Int> = textView.tag as Array<Int>
+            when(buttonView?.id){
+                R.id.cbPurity1 -> { arr[0] = if (isChecked) 1 else 0 }
+                R.id.cbPurity2 -> { arr[1] = if (isChecked) 1 else 0 }
+                R.id.cbPurity3 -> {
+                    arr[2] = if (isChecked) 1 else 0
+                    if (isChecked){
+                        Toast.makeText(buttonView.context, "You should konwn what you are doing !!!", Toast.LENGTH_SHORT).show()
+                    }
+
+                }
+            }
+            purity = "${arr[0]}${arr[1]}${arr[2]}"
+            textView.text = "Purity: $purity"
+        }
+    }
+
+    class ColorListener(private val layout:LinearLayout,private val tv:TextView) : View.OnClickListener{
+        override fun onClick(v: View?) {
+            if (v is TextView){
+                val text = v.text.toString()
+                if (text == "clear"){
+                    tv.text = "Colors: 清除"
+                    color = ""
+                    layout.setBackgroundColor(Color.parseColor("#FFFFFF"))
+                }else{
+                    tv.text = "Colors: #$text"
+                    color = text
+                    layout.setBackgroundColor(Color.parseColor("#$text"))
+                }
+            }
+        }
+
+    }
+
+
 }
