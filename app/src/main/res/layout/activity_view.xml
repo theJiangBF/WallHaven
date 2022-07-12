@@ -58,36 +58,51 @@
         android:background="#CD000000"
         android:orientation="vertical"
         >
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <LinearLayout style="@style/li" >
+                    <TextView style="@style/title" android:text="Uploader" />
+                    <TextView style="@style/property" android:textColor="#00F813" android:text="Uploader" android:id="@+id/tvUploader" />
+                </LinearLayout>
 
-        <LinearLayout style="@style/li" >
-            <TextView style="@style/title" android:text="Uploader" />
-            <TextView style="@style/property" android:textColor="#00F813" android:text="Uploader" android:id="@+id/tvUploader" />
-        </LinearLayout>
+                <LinearLayout style="@style/li" >
+                    <TextView style="@style/title" android:text="Category" />
+                    <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvCategory" />
+                </LinearLayout>
 
-        <LinearLayout style="@style/li" >
-            <TextView style="@style/title" android:text="Category" />
-            <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvCategory" />
-        </LinearLayout>
+                <LinearLayout style="@style/li" >
+                    <TextView style="@style/title" android:text="Purity" />
+                    <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvPurity" />
+                </LinearLayout>
 
-        <LinearLayout style="@style/li" >
-            <TextView style="@style/title" android:text="Purity" />
-            <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvPurity" />
-        </LinearLayout>
+                <LinearLayout style="@style/li" >
+                    <TextView style="@style/title" android:text="Size" />
+                    <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvSize" />
+                </LinearLayout>
 
-        <LinearLayout style="@style/li" >
-            <TextView style="@style/title" android:text="Size" />
-            <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvSize" />
-        </LinearLayout>
+                <LinearLayout style="@style/li" >
+                    <TextView style="@style/title" android:text="Views" />
+                    <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvViews" />
+                </LinearLayout>
 
-        <LinearLayout style="@style/li" >
-            <TextView style="@style/title" android:text="Views" />
-            <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvViews" />
-        </LinearLayout>
+                <LinearLayout style="@style/li" >
+                    <TextView style="@style/title" android:text="Favourites" />
+                    <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvFavourites" />
+                </LinearLayout>
 
-        <LinearLayout style="@style/li" >
-            <TextView style="@style/title" android:text="Favourites" />
-            <TextView style="@style/property" android:text="Uploader" android:id="@+id/tvFavourites" />
-        </LinearLayout>
+                <LinearLayout style="@style/li" >
+                    <TextView style="@style/title" android:text="Tags" />
+                    <TextView android:textIsSelectable="true" style="@style/property" android:text="none" android:id="@+id/tvTags" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+
 
 
     </LinearLayout>

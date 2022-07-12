@@ -10,7 +10,7 @@ object document {
         return document.html(html).getElementsByAttributeValue(attribute, name)
     }
 
-    fun getElementsByClass(html: String, className: String, name: String): Elements {
+    fun getElementsByClass(html: String, className: String): Elements {
         val document = Jsoup.parse(html)
         return document.html(html).getElementsByClass(className)
     }

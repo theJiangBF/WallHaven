@@ -48,6 +48,7 @@ class ViewActivity : AppCompatActivity() {
     private var size = ""
     private var views = ""
     private var favs = ""
+    private var tags = ""
 
     private var url = ""
     private var src = ""
@@ -79,6 +80,12 @@ class ViewActivity : AppCompatActivity() {
                 }
                 src = document.getElementById(doc.html(),"wallpaper").attr("src")
 
+                val ulTag = document.getElementById(doc.html(),"tags")
+                val aTag = document.getElementsByClass(ulTag.html(),"tagname")
+                for (i in 0 until aTag.size){
+                    tags = "$tags${aTag[i].text()},"
+                }
+
                 val sp = getSharedPreferences("splash", MODE_PRIVATE)
                 val edit = sp.edit()
                 edit.putString("url",src)
@@ -104,6 +111,8 @@ class ViewActivity : AppCompatActivity() {
                     tvSize.text = size
                     tvViews.text = views
                     tvFavourites.text = favs
+
+                    tvTags.text = tags
 
                     Glide.with(this@ViewActivity)
                         .load(src)
